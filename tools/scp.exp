@@ -1,0 +1,36 @@
+#!/usr/bin/expect  --
+# 20180621 qing
+#exp_internal 1
+set timeout -1
+
+if { [llength $argv] < 6} {
+  puts "usage: $argv0  local remote user passwd ip port verbose"
+  exit 1
+}
+
+set src  [lindex $argv 0]
+set dst  [lindex $argv 1]
+set user [lindex $argv 2]
+set pswd [lindex $argv 3]
+set ip   [lindex $argv 4]
+set port [lindex $argv 5]
+set verb [lindex $argv 6]
+
+# Disable dialogue output to stdout
+log_user $verb
+
+spawn /usr/bin/scp -q -r -P$port $src $user@$ip:$dst
+
+expect {
+  "yes/no)?" {
+    send "yes\r"; exp_continue
+  }
+  "assword:" {
+    send "$pswd\r"
+  }
+  timeout {puts "Timeout for $user@$ip:$port"; exit 2}
+  default {puts "No response from $ip:$port"; exit 3}
+}
+#puts "Done for $user@$ip:$port";
+expect eof
+

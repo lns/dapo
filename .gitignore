@@ -1,0 +1,12 @@
+.idea
+darl.egg-info/
+darl/__pycache__/
+darl/trainer/__pycache__/
+darl/model_tf/__pycache__/
+darl/actor/out/
+darl/out/
+darl/memoire.so
+__pycache__
+*.pyc
+.DS_Store
+.pytest_cache/

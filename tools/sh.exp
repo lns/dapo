@@ -1,0 +1,49 @@
+#!/usr/bin/expect  --
+# 20180621 qing
+#exp_internal 1
+set timeout -1
+
+if { [llength $argv] < 5} {
+  puts "usage: $argv0  cmd user passwd ip port verbose"
+  exit 1
+}
+
+set cmd  [lindex $argv 0]
+set user [lindex $argv 1]
+set pswd [lindex $argv 2]
+set ip   [lindex $argv 3]
+set port [lindex $argv 4]
+set verb [lindex $argv 5]
+
+# Disable dialogue output to stdout
+log_user $verb
+
+spawn /usr/bin/ssh -q -p$port $ip -l$user
+
+expect {
+  "yes/no)?" {
+    send "yes\r"; exp_continue
+  }
+  "assword:" {
+    send "$pswd\r"
+  }
+  "$ " {send "\r"}
+  "#" {send "\r"}
+  ">" {send "\r"}
+  timeout {puts "Timeout for $user@$ip:$port"; exit 2}
+  default {puts "No response from $ip:$port"; exit 3}
+}
+expect {
+  "assword:" {puts "Invalid password '$pswd' for $user@$ip:$port"; exit 4}
+  "$ " {send "$cmd\r"}
+  "#" {send "$cmd\r"}
+  ">" {send "$cmd\r"}
+}
+expect {
+  "$ " {send "wait; exit\r"}
+  "#" {send "wait; exit\r"}
+  ">" {send "wait; exit\r"}
+}
+puts "Done for $user@$ip:$port";
+expect eof
+
